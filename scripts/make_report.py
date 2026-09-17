@@ -28,6 +28,8 @@ class Report(FPDF):
         self.cell(0, 10, f"BoardScan Project Report  |  p. {self.page_no()}/{{nb}}", align="C")
 
     def h1(self, t):
+        if self.get_y() > 245:  # keep heading with following content
+            self.add_page()
         self.set_font("Helvetica", "B", 14)
         self.set_text_color(20, 40, 120)
         self.multi_cell(0, 9, clean(t), new_x="LMARGIN", new_y="NEXT")
@@ -48,6 +50,7 @@ class Report(FPDF):
         self.set_font("Helvetica", "", 10)
         for it in items:
             self.multi_cell(0, 6, clean(f"  - {it}"), new_x="LMARGIN", new_y="NEXT")
+            self.ln(1)
         self.ln(1)
 
     def table(self, head, rows, widths=None):
@@ -83,7 +86,7 @@ r.set_auto_page_break(True, 20)
 
 # 1. Cover
 r.add_page()
-r.ln(30)
+r.ln(55)
 r.set_font("Helvetica", "B", 26)
 r.multi_cell(0, 12, "BoardScan", align="C", new_x="LMARGIN", new_y="NEXT")
 r.set_font("Helvetica", "", 16)
@@ -163,7 +166,8 @@ r.bullets([
     "CLAHE over global equalisation: handles uneven lamp light across the board.",
     "Probabilistic Hough over standard Hough: segment endpoints enable angle clustering; minLineLength tied to square size.",
     "Lattice + contour fallback (larger quad wins): lattice extrapolates clipped corners; contour traces occluded borders.",
-    "Per-square CNN over whole-board detector: 64 easy 13-class problems beat one 32-object detection at ~8k squares.",
+    "Per-square CNN over whole-board detector: 64 easy 13-class problems beat "
+    "one hard 32-object detector on only about eight thousand training squares.",
     "Split by photo, not by square: same-photo squares share lighting; naive split inflates accuracy (we reproduced a fake 100%).",
     "King-count validation: >1 king per side is an error; missing kings (empty calibration boards) only warn.",
     "Mixed synthetic + realistic training: single-style training collapses on unseen art (train/serve skew).",
@@ -184,17 +188,28 @@ r.bullets([
 # 10. Results
 r.add_page()
 r.h1("10. Screenshots / Results")
-for name, cap in [("01_gray.png", "Preprocessed input"), ("04_edges.png", "Canny edge map"),
-                  ("07_warped.png", "Rectified 800x800 board"), ("08_overlay.png", "Lines + corners overlay")]:
-    src = DEBUG / name
-    if src.exists():
-        if r.get_y() > 190:
-            r.add_page()
-        r.image(str(src), x=30, w=150)
-        r.set_font("Helvetica", "I", 9)
-        r.multi_cell(0, 6, clean(f"Fig. - {cap} ({name})"), align="C")
-        r.ln(2)
-r.img("confusion_matrix.png", width=150, caption="Fig. - Confusion matrix, combined held-out set.")
+r.h2("Pipeline stages (debug dumps for data/raw/000.jpg)")
+stages = [("01_gray.png", "Fig. 5 - grayscale + downscale"),
+          ("04_edges.png", "Fig. 6 - Canny edge map"),
+          ("07_warped.png", "Fig. 7 - rectified 800x800 board"),
+          ("08_overlay.png", "Fig. 8 - Hough lines + corners overlay")]
+x0, top, cw = 15, r.get_y(), 80
+import cv2 as _cv2
+row_h = 0
+cells = []
+for name, cap in stages:
+    ih, iw = _cv2.imread(str(DEBUG / name)).shape[:2]
+    cells.append((name, cap, cw * ih / iw))
+row_h = max(h for _, _, h in cells) + 10
+for i, (name, cap, h) in enumerate(cells):
+    col, row = i % 2, i // 2
+    x, y = x0 + col * 92, top + row * row_h
+    r.image(str(DEBUG / name), x=x, y=y, w=cw)
+    r.set_xy(x, y + h + 1)
+    r.set_font("Helvetica", "I", 8)
+    r.multi_cell(cw, 5, clean(cap), align="C", new_x="LMARGIN", new_y="NEXT")
+r.set_y(top + 2 * row_h + 2)
+r.img("confusion_matrix.png", width=150, caption="Fig. 9 - Confusion matrix, combined held-out set (1344 squares).")
 r.h2("Measured results (honest)")
 r.table(["Metric", "Value"],
         [["Rectify success (15 synthetic boards)", "100%, grid within 10 px"],
@@ -202,7 +217,7 @@ r.table(["Metric", "Value"],
          ["Classifier per-square (synthetic held-out)", "100% (640 squares)"],
          ["Classifier per-square (combined held-out)", "89.4% (1344 squares)"],
          ["Live demo, 5 rendered boards", "53-60/64 squares each; 0/5 exact FEN"],
-         ["Full CLI time", "~0.08 s CPU"],
+         ["Full CLI time", "about 0.08 s CPU"],
          ["Unit tests", "16/16 pass"]],
         widths=[70, 120])
 r.h2("Preprocessing ablation (15 synthetic boards)")
