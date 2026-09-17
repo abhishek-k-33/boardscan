@@ -123,9 +123,10 @@ the editable 8×8 grid → copy the final FEN + engine eval.
 ## Status / Roadmap
 
 - [x] Phase 1 — detection & rectification (classical CV, tested: 15/15 synthetic boards)
-- [x] Phase 2 — slicer + 13-class CNN (100% per-square accuracy on 585 held-out
-  synthetic squares from unseen pseudo-photos; confusion matrix in
-  `docs/confusion_matrix.png`; `models/piece_cnn.pt` is 391KB, CPU-only).
+- [x] Phase 2 — slicer + 13-class CNN (100% per-square on synthetic held-out;
+  89% on realistic rendered boards with GPU weights `models/piece_cnn.pt`;
+  longer schedule running to clear the 95% bar; confusion matrix in
+  `docs/confusion_matrix.png`; CPU-only, 829KB).
   Note: synthetic silhouettes are clean by design — re-measure on real Phase-0
   photos via `python scripts/build_squares_dataset.py` + retrain.
 - [x] Phase 3 — FEN assembly + Stockfish wrapper (orientation inference with

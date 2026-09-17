@@ -102,6 +102,7 @@ def main() -> int:
     print(f"params: {count_parameters(net):,} "
           f"({count_parameters(net) * 4 / 1024:.0f} KB fp32, limit 5MB)")
     opt = torch.optim.Adam(net.parameters(), lr=args.lr)
+    sched = torch.optim.lr_scheduler.StepLR(opt, step_size=15, gamma=0.1)
     loss_fn = nn.CrossEntropyLoss()
     best_va, best_state = 0.0, None
     t0 = time.time()
@@ -116,6 +117,7 @@ def main() -> int:
             tot += loss.item() * len(x)
             n += len(x)
         va_acc, _, _, _ = evaluate(net, va_l, device)
+        sched.step()
         print(f"epoch {ep:02d}/{args.epochs} loss={tot / n:.4f} val_acc={va_acc:.4f}", flush=True)
         if va_acc >= best_va:
             best_va, best_state = va_acc, {k: v.cpu() for k, v in net.state_dict().items()}
