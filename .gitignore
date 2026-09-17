@@ -2,6 +2,8 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-*.pt
 data/squares/
-docs/confusion_matrix.png
+data/synth_squares/
+# NOTE: models/piece_cnn.pt and docs/confusion_matrix.png are force-added
+# (git add -f) so the classifier works out-of-the-box; retrain anytime via
+#   python scripts/render_synthetic_squares.py && python src/model/train.py

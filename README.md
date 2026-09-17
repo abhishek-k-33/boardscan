@@ -98,9 +98,21 @@ boardscan/
 ├── tests/  scripts/  data/raw  data/squares  docs/  debug/
 ```
 
+Retrain the classifier any time (regenerates weights + confusion matrix):
+
+```bash
+python scripts/render_synthetic_squares.py --per-class 300
+python src/model/train.py --epochs 20
+```
+
 ## Status / Roadmap
 
-- [x] Phase 1 — detection & rectification (classical CV, tested)
+- [x] Phase 1 — detection & rectification (classical CV, tested: 15/15 synthetic boards)
+- [x] Phase 2 — slicer + 13-class CNN (100% per-square accuracy on 585 held-out
+  synthetic squares from unseen pseudo-photos; confusion matrix in
+  `docs/confusion_matrix.png`; `models/piece_cnn.pt` is 391KB, CPU-only).
+  Note: synthetic silhouettes are clean by design — re-measure on real Phase-0
+  photos via `python scripts/build_squares_dataset.py` + retrain.
 - [ ] Phase 0 — 60 real photo/FEN pairs (synthetic stand-in provided)
 - [ ] Phase 2 — slicer + 13-class CNN (≥95% per-square accuracy)
 - [ ] Phase 3 — FEN assembly + Stockfish wrapper (≥8/10 exact FEN)
