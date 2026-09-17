@@ -11,17 +11,19 @@ import config
 
 
 class PieceCNN(nn.Module):
-    def __init__(self, num_classes: int = config.MODEL_NUM_CLASSES):
+    def __init__(self, num_classes: int = config.MODEL_NUM_CLASSES,
+                 channels: tuple = config.MODEL_CHANNELS):
         super().__init__()
+        c1, c2, c3 = channels
         self.features = nn.Sequential(
-            nn.Conv2d(3, 32, 3, padding=1), nn.BatchNorm2d(32), nn.ReLU(),
+            nn.Conv2d(3, c1, 3, padding=1), nn.BatchNorm2d(c1), nn.ReLU(),
             nn.MaxPool2d(2),                      # 64 -> 32
-            nn.Conv2d(32, 64, 3, padding=1), nn.BatchNorm2d(64), nn.ReLU(),
+            nn.Conv2d(c1, c2, 3, padding=1), nn.BatchNorm2d(c2), nn.ReLU(),
             nn.MaxPool2d(2),                      # 32 -> 16
-            nn.Conv2d(64, 128, 3, padding=1), nn.BatchNorm2d(128), nn.ReLU(),
+            nn.Conv2d(c2, c3, 3, padding=1), nn.BatchNorm2d(c3), nn.ReLU(),
         )
         self.gap = nn.AdaptiveAvgPool2d(1)        # global average pooling
-        self.fc = nn.Linear(128, num_classes)
+        self.fc = nn.Linear(c3, num_classes)
 
     def forward(self, x):
         x = self.features(x)

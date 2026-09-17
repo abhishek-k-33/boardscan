@@ -77,11 +77,17 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=config.TRAIN_SEED)
     ap.add_argument("--out", type=Path, default=config.CLASSIFIER_WEIGHTS)
     ap.add_argument("--confusion", type=Path, default=config.CONFUSION_MATRIX_PNG)
+    ap.add_argument("--device", type=str, default="auto",
+                    help="'auto' (cuda if available), 'cpu', or 'cuda'")
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
-    device = torch.device("cpu")
+    if args.device == "auto":
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    else:
+        device = torch.device(args.device)
+    print(f"device: {device}")
     rows = load_manifest(args.manifest)
     tr, va, te = split_by_photo(rows, seed=args.seed)
     print(f"squares: train={len(tr)} val={len(va)} test={len(te)} "

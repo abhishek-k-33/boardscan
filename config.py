@@ -56,8 +56,11 @@ RECTIFY_SUCCESS_RATE = 0.90
 SQUARE_CROP_SIZE = 100        # deterministic crops from 800x800 warped board
 SQUARE_VERTICAL_BIAS_PX = 25  # shift crop window upward: pieces are taller than
                               # their square, this keeps the piece head in frame
-MODEL_INPUT_SIZE = 64         # CNN input (crops resized to this)
+MODEL_INPUT_SIZE = 96         # CNN input; 96px keeps crown/slit detail that 64px
+                              # aliases away on realistic piece art (GAP keeps params flat)
 MODEL_NUM_CLASSES = 13        # 6 white + 6 black + empty
+MODEL_CHANNELS = (48, 96, 192)  # widened 2026-09: realistic piece art needs more
+                                # capacity than stylised silhouettes (~210k params)
 CLASS_LABELS = ('empty', 'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k')
 
 # ---- Training ----
