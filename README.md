@@ -105,6 +105,21 @@ python scripts/render_synthetic_squares.py --per-class 300
 python src/model/train.py --epochs 20
 ```
 
+## Demo UI
+
+```bash
+streamlit run app/streamlit_app.py
+```
+
+Upload a photo → inspect original / rectified / grid stages → fix any square in
+the editable 8×8 grid → copy the final FEN + engine eval.
+
+## Diagrams (`docs/`)
+
+`architecture.png`, `usecase.png`, `sequence.png`, `class-diagram.png`
+(regenerate with `python scripts/make_diagrams.py`), plus the trained
+`confusion_matrix.png`.
+
 ## Status / Roadmap
 
 - [x] Phase 1 — detection & rectification (classical CV, tested: 15/15 synthetic boards)
@@ -122,4 +137,5 @@ python src/model/train.py --epochs 20
 - [ ] Phase 0 — 60 real photo/FEN pairs (synthetic stand-in provided)
 - [ ] Phase 2 — slicer + 13-class CNN (≥95% per-square accuracy)
 - [ ] Phase 3 — FEN assembly + Stockfish wrapper (≥8/10 exact FEN)
-- [ ] Phase 4 — Streamlit UI, UML docs, report figures
+- [x] Phase 4 — Streamlit UI (upload, stage views, editable grid, FEN+eval),
+  UML/architecture diagrams in `docs/`, debug overlay layer.
