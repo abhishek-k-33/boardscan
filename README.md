@@ -113,6 +113,12 @@ python src/model/train.py --epochs 20
   `docs/confusion_matrix.png`; `models/piece_cnn.pt` is 391KB, CPU-only).
   Note: synthetic silhouettes are clean by design — re-measure on real Phase-0
   photos via `python scripts/build_squares_dataset.py` + retrain.
+- [x] Phase 3 — FEN assembly + Stockfish wrapper (orientation inference with
+  user-flip fallback, illegal-position errors via king counts, degraded
+  FEN-only mode without binary; `main.py --classify` end-to-end; e2e exact-FEN
+  smoke test on synthetic positions).
+  Note: `--classify` on bare synthetic boards underperforms (train/serve
+  background skew) — retraining on real sliced squares closes it.
 - [ ] Phase 0 — 60 real photo/FEN pairs (synthetic stand-in provided)
 - [ ] Phase 2 — slicer + 13-class CNN (≥95% per-square accuracy)
 - [ ] Phase 3 — FEN assembly + Stockfish wrapper (≥8/10 exact FEN)
