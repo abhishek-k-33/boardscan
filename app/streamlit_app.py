@@ -67,8 +67,8 @@ if uploaded is not None:
         pred_grid = clf.predict_grid(slice_board(res.warped))
     files = [f"{chr(ord('a') + c)}" for c in range(8)]
     df = pd.DataFrame(pred_grid, columns=files)
-    edited = st.data_editor(df, use_container_width=True,
-                            help="Each cell: empty, P N B R Q K (white), p n b r q k (black)")
+    edited = st.data_editor(df, use_container_width=True)
+    st.caption("Each cell: empty, P N B R Q K (white), p n b r q k (black)")
     # sanitise edits: unknown tokens revert to the prediction
     grid = []
     fixed = 0
