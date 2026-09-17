@@ -1,0 +1,7 @@
+debug/
+data/squares/
+*.pt
+__pycache__/
+*.pyc
+.pytest_cache/
+docs/confusion_matrix.png
