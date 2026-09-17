@@ -12,15 +12,15 @@ CNN is used only for the 64-square piece-classification step.
 ## Features
 
 - **Module 1 — Board Detection & Rectification**: arbitrary-perspective photo →
-  800×800 top-down warped board (implemented)
+  800×800 top-down warped board.
 - **Module 2 — Square Segmentation & Piece Classification**: rectified board →
-  8×8 label grid, 13 classes (planned)
+  8×8 label grid, 13 classes (6 white + 6 black + empty).
 - **Module 3 — FEN Assembly & Engine Analysis**: label grid → FEN string,
-  centipawn eval + best move via Stockfish, graceful degraded mode without it
-  (planned)
+  centipawn eval + best move via Stockfish, graceful degraded mode without it.
 - **Module 4 — Debug/Visualisation Layer**: every stage dumps annotated
-  intermediates to `debug/` via `--debug` (implemented)
-- Synthetic board generator for testing without a physical board
+  intermediates to `debug/` via `--debug`; Streamlit demo with editable grid.
+- Synthetic board generator + rendered-board dataset importer for testing
+  without a physical board.
 
 ## Tech Stack
 
@@ -31,7 +31,7 @@ CNN is used only for the 64-square piece-classification step.
 ## Install
 
 ```bash
-git clone https://github.com/<your-username>/boardscan.git
+git clone https://github.com/abhishek-k-33/boardscan.git
 cd boardscan
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -68,7 +68,10 @@ pytest tests/ -v
 
 - `test_rectify.py` — Phase-1 acceptance: ≥90% of empty-board photos rectify so
   inner grid lines land within 10px of the expected 100px spacing.
-- `test_fen.py`, `test_pipeline.py` — planned with Modules 2–3.
+- `test_squares.py` — slicer determinism/bias, FEN label mapping, by-photo
+  split integrity, CNN forward shape + 5MB budget.
+- `test_fen.py` — FEN round-trip, orientation flip/tie, illegal-position errors.
+- `test_pipeline.py` — end-to-end exact-FEN smoke test + engine degraded mode.
 
 ## Screenshots
 
@@ -90,11 +93,11 @@ boardscan/
 ├── README.md  statement.md  requirements.txt  config.py  main.py
 ├── src/
 │   ├── detection/  preprocess.py lines.py corners.py rectify.py pipeline.py
-│   ├── squares/    slicer.py classifier.py        # Module 2 (planned)
-│   ├── model/      architecture.py train.py dataset.py  # Module 2 (planned)
-│   ├── notation/   fen.py engine.py               # Module 3 (planned)
+│   ├── squares/    slicer.py labels.py classifier.py
+│   ├── model/      architecture.py dataset.py train.py
+│   ├── notation/   fen.py engine.py
 │   └── debug/      overlay.py
-├── app/            streamlit_app.py               # Module 4 UI (planned)
+├── app/            streamlit_app.py
 ├── tests/  scripts/  data/raw  data/squares  docs/  debug/
 ```
 
@@ -120,8 +123,10 @@ the editable 8×8 grid → copy the final FEN + engine eval.
 (regenerate with `python scripts/make_diagrams.py`), plus the trained
 `confusion_matrix.png`.
 
-## Status / Roadmap
+## Status
 
+- [x] Phase 0 — 75 image/FEN pairs (`data/raw/`, validated with
+  `scripts/validate_fen.py`; rendered-board dataset, see Data Sources below)
 - [x] Phase 1 — detection & rectification (classical CV, tested: 15/15 synthetic boards)
 - [x] Phase 2 — slicer + 13-class CNN (100% per-square on synthetic held-out;
   89% on realistic rendered boards with GPU weights `models/piece_cnn.pt`;
@@ -134,8 +139,15 @@ the editable 8×8 grid → copy the final FEN + engine eval.
   smoke test on synthetic positions).
   Note: `--classify` on bare synthetic boards underperforms (train/serve
   background skew) — retraining on real sliced squares closes it.
-- [ ] Phase 0 — 60 real photo/FEN pairs (synthetic stand-in provided)
-- [ ] Phase 2 — slicer + 13-class CNN (≥95% per-square accuracy)
-- [ ] Phase 3 — FEN assembly + Stockfish wrapper (≥8/10 exact FEN)
 - [x] Phase 4 — Streamlit UI (upload, stage views, editable grid, FEN+eval),
   UML/architecture diagrams in `docs/`, debug overlay layer.
+
+## Data Sources
+
+- `scripts/render_synthetic_squares.py` — stylised bootstrap silhouettes.
+- `scripts/import_hf_sample.py` — 75 rendered boards from
+  [honi05/chess-positions-cv](https://huggingface.co/datasets/honi05/chess-positions-cv)
+  (FEN placement in filename); disclosed here and in the report.
+- [ChessReD](https://data.4tu.nl/datasets/99b5c721-280b-450b-b058-b2900b69a90f)
+  (10,800 real smartphone photos + FEN annotations) recommended for future
+  real-photo retraining.
